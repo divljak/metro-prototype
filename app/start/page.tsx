@@ -34,40 +34,40 @@ export default function StartPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="px-4 py-6 border-b">
-        <div className="max-w-2xl mx-auto">
-          <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-white font-bold text-xl">M</span>
+      <div className="px-6 py-6 md:px-12 border-b bg-white">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="h-14 w-14 rounded-lg bg-primary flex items-center justify-center shadow-card">
+            <span className="text-white font-bold text-2xl">M</span>
           </div>
         </div>
       </div>
 
-      {/* Hero Section */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-2xl space-y-8">
+      {/* Hero Section with Gradient */}
+      <div className="flex-1 flex items-center justify-center px-6 py-16 md:py-24 bg-gradient-blue-hero">
+        <div className="w-full max-w-screen-2xl space-y-12">
           {/* Main heading */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+          <div className="text-center space-y-6">
+            <h1 className="text-display-responsive font-bold text-white leading-tight">
               Welcome to Metro Bank Business Banking
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto">
+            <p className="text-body-lg md:text-h3 text-white/90 max-w-2xl mx-auto">
               Open a business current account in minutes. No monthly fees, instant provisional account.
             </p>
           </div>
 
           {/* Feature cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {features.map((feature) => {
               const Icon = feature.icon
               return (
-                <Card key={feature.title} className="border-2">
-                  <CardContent className="p-5 flex items-start gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-5 w-5 text-primary" />
+                <Card key={feature.title} className="border-2 hover:shadow-card-hover hover:scale-[1.02] cursor-pointer bg-white/95 backdrop-blur">
+                  <CardContent className="p-6 flex items-start gap-4">
+                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-foreground mb-1">{feature.title}</p>
-                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                      <p className="font-semibold text-foreground text-h3 mb-2">{feature.title}</p>
+                      <p className="text-body text-muted-foreground">{feature.description}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -76,7 +76,7 @@ export default function StartPage() {
           </div>
 
           {/* CTA */}
-          <div className="space-y-3">
+          <div className="space-y-4 max-w-md mx-auto">
             <Button
               size="lg"
               className="w-full h-14 text-lg"
@@ -84,9 +84,9 @@ export default function StartPage() {
             >
               Get started
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-white/80">
               Already started? <button
-                className="text-primary font-medium hover:underline"
+                className="text-white font-semibold hover:underline"
                 onClick={() => router.push('/onboarding/round1/login')}
               >
                 Continue your application
@@ -95,11 +95,11 @@ export default function StartPage() {
           </div>
 
           {/* Info footer */}
-          <div className="text-center space-y-2 pt-6">
-            <p className="text-xs text-muted-foreground">
+          <div className="text-center space-y-2 pt-8">
+            <p className="text-xs text-white/70">
               By continuing, you agree to our Terms of Service and Privacy Policy
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-white/70">
               Metro Bank PLC is authorized by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority
             </p>
           </div>

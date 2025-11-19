@@ -11,9 +11,13 @@ const config: Config = {
   theme: {
     container: {
       center: true,
-      padding: '2rem',
+      padding: {
+        DEFAULT: '1.5rem',
+        sm: '2rem',
+        lg: '5rem',  // 80px desktop padding per marketing design
+      },
       screens: {
-        '2xl': '1400px'
+        '2xl': '1280px'  // Match marketing max-width
       }
     },
     screens: {
@@ -84,26 +88,48 @@ const config: Config = {
         input: "rgb(var(--input) / <alpha-value>)",
         ring: "rgb(var(--ring) / <alpha-value>)",
       },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+      },
       spacing: {
         'touch': '44px',    // Minimum touch target (Apple/Android guidelines)
         'touch-lg': '48px', // Preferred touch target
+        '18': '4.5rem',     // 72px - Marketing nav height
+        '22': '5.5rem',     // 88px
+        '26': '6.5rem',     // 104px
+        '30': '7.5rem',     // 120px
       },
       fontSize: {
-        // Fluid typography - responsive font sizes
-        'display': ['clamp(2rem, 5vw, 3rem)', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-        'balance': ['clamp(2rem, 4vw, 2.5rem)', { lineHeight: '1.1', fontWeight: '700' }],
-        'h1-responsive': ['clamp(1.75rem, 3vw, 2.25rem)', { lineHeight: '1.2' }],
-        'h2-responsive': ['clamp(1.5rem, 2.5vw, 1.875rem)', { lineHeight: '1.3' }],
-        'h3-responsive': ['clamp(1.25rem, 2vw, 1.5rem)', { lineHeight: '1.4' }],
+        // Marketing design system typography scale
+        'display': ['3.25rem', { lineHeight: '1.1', fontWeight: '700' }],  // 52px
+        'h1': ['2.5rem', { lineHeight: '1.1', fontWeight: '700' }],        // 40px
+        'h2': ['1.75rem', { lineHeight: '1.2', fontWeight: '700' }],       // 28px
+        'h3': ['1.375rem', { lineHeight: '1.3', fontWeight: '600' }],      // 22px
+        'body-lg': ['1.125rem', { lineHeight: '1.5', fontWeight: '400' }], // 18px
+        'body': ['1rem', { lineHeight: '1.5', fontWeight: '400' }],        // 16px
+        'body-sm': ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }], // 14px
+        // Fluid responsive variants
+        'display-responsive': ['clamp(2rem, 5vw, 3.25rem)', { lineHeight: '1.1', fontWeight: '700' }],
+        'h1-responsive': ['clamp(1.75rem, 4vw, 2.5rem)', { lineHeight: '1.1', fontWeight: '700' }],
+        'h2-responsive': ['clamp(1.5rem, 3vw, 1.75rem)', { lineHeight: '1.2', fontWeight: '700' }],
+        'h3-responsive': ['clamp(1.25rem, 2vw, 1.375rem)', { lineHeight: '1.3', fontWeight: '600' }],
       },
       borderRadius: {
-        lg: "12px",     // Cards, alerts - from reference design system
-        md: "8px",      // Medium elements
-        sm: "4px",      // Inputs, small elements
-        pill: "9999px", // Buttons, badges - full pill shape
+        'xl': "20px",   // Premium cards (subscription plans)
+        'lg': "16px",   // Feature cards
+        'md': "12px",   // Standard cards, alerts
+        'sm': "8px",    // Medium elements
+        'xs': "4px",    // Inputs, small elements
+        'pill': "9999px", // Buttons, badges - full pill shape
       },
       boxShadow: {
-        none: 'none'
+        'card': '0px 4px 12px rgba(0, 0, 0, 0.08)',
+        'card-hover': '0px 8px 24px rgba(0, 0, 0, 0.12)',
+        'none': 'none',
+      },
+      backgroundImage: {
+        'gradient-blue-hero': 'linear-gradient(180deg, #0033A0 0%, #001A72 100%)',
+        'gradient-red-hero': 'linear-gradient(180deg, #E4002B 0%, #FF4A4A 100%)',
       },
       keyframes: {
         'accordion-down': {

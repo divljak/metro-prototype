@@ -5,25 +5,25 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 shadow-none",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-pill text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 shadow-none",
   {
     variants: {
       variant: {
-        // Primary (Blue): Most common button - Login, Continue, Save, Submit (75%)
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 border-0",
-        // Accent (Red): Critical CTAs only - Confirm Payment, Transfer Funds, Apply Now (25%)
-        accent: "bg-accent text-accent-foreground hover:bg-accent/90 border-0",
-        // Secondary: White with blue border
+        // Primary (Red): Marketing design - Red CTAs for primary actions
+        default: "bg-accent text-accent-foreground hover:bg-accent/95 active:bg-accent/90 border-0",
+        // Blue: Secondary CTAs
+        blue: "bg-primary text-primary-foreground hover:bg-primary/95 active:bg-primary/90 border-0",
+        // Secondary: Transparent with red border (marketing design)
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border-2 border-primary",
+          "bg-transparent text-accent hover:bg-accent/10 active:bg-accent/20 border-2 border-accent",
         // Destructive/Error: For dangerous actions
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 border-0",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/95 active:bg-destructive/90 border-0",
         // Outline: Light border, navy text
         outline:
-          "border-2 border-border bg-background hover:bg-muted text-foreground",
+          "border-2 border-border bg-background hover:bg-muted active:bg-muted/80 text-foreground",
         // Ghost: Subtle actions, navigation
-        ghost: "hover:bg-muted text-primary",
+        ghost: "hover:bg-muted active:bg-muted/80 text-primary",
         // Link: For text links
         link: "text-primary underline-offset-4 hover:underline",
       },
