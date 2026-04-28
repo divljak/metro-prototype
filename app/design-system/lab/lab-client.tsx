@@ -1,8 +1,17 @@
 "use client"
 
+import * as React from "react"
 import { useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { ExternalLink, GitPullRequest, Eye, EyeOff, RotateCcw } from "lucide-react"
+import {
+  ExternalLink,
+  GitPullRequest,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Trash2,
+  Sparkles,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -13,6 +22,7 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { drafts } from "@/components/_lab/_drafts/_index"
 
 const REPO = "divljak/metro-prototype"
 
@@ -28,41 +38,35 @@ export type Candidate = {
   dismissedReason: string | null
   firstSeenAt: string
   lastSeenAt: string
+  approved?: boolean
+  draftSlug?: string | null
+  componentName?: string | null
 }
 
-function approveUrl(c: Candidate) {
+function promoteUrl(slug: string, componentName: string) {
   const params = new URLSearchParams({
-    template: "promote-component.md",
-    title: `Promote: ${c.suggestedName}`,
+    quick_pull: "1",
+    title: `Promote: ${componentName}`,
     labels: "design-system,promotion",
   })
-  const occList =
-    c.occurrences.map((o) => `- \`${o.file}:${o.line}\``).join("\n") || "_(none)_"
   const body = [
-    `## Auto-detected pattern`,
-    `Hash: \`${c.hash}\``,
-    `Suggested name: \`${c.suggestedName}\` _(rename as appropriate)_`,
+    `## Promotes draft \`${slug}\` to the design system`,
     ``,
-    `## Occurrences (${c.occurrenceCount} across ${c.prototypeCount} prototype(s))`,
-    occList,
+    `Moves \`components/_lab/_drafts/${slug}.tsx\` → \`components/ui/<final-name>.tsx\``,
     ``,
-    `## Sample`,
-    "```tsx",
-    c.sample,
-    "```",
-    ``,
-    `## Promotion checklist`,
-    `- [ ] Renamed to a semantic name`,
-    `- [ ] Prop API designed (not auto-generated literals)`,
-    `- [ ] Variants defined via CVA`,
+    `## Checklist`,
+    `- [ ] Component renamed from auto-generated name`,
+    `- [ ] Real prop API (semantic names, no \`prop1\`)`,
+    `- [ ] Variants defined via CVA where needed`,
     `- [ ] Showcase entry added to \`app/design-system/page.tsx\``,
     `- [ ] Passes \`npm run lint:tokens\``,
     `- [ ] A11y: keyboard, screen reader, focus states`,
     `- [ ] Responsive across xs / sm / md / lg`,
-    `- [ ] Reviewed by design-system owner`,
+    `- [ ] Removed from \`components/_lab/_drafts/\` (and \`_index.tsx\` regenerated)`,
+    `- [ ] Reviewed by design-system owner (CODEOWNERS gate)`,
   ].join("\n")
   params.set("body", body)
-  return `https://github.com/${REPO}/issues/new?${params.toString()}`
+  return `https://github.com/${REPO}/compare/main...?${params.toString()}`
 }
 
 function sourceUrl(o: { file: string; line: number }) {
@@ -70,59 +74,241 @@ function sourceUrl(o: { file: string; line: number }) {
 }
 
 export function LabClient({ candidates }: { candidates: Candidate[] }) {
-  const [showDismissed, setShowDismissed] = useState(false)
-  const visible = useMemo(
-    () => candidates.filter((c) => showDismissed || !c.dismissed),
-    [candidates, showDismissed]
-  )
-  const dismissedCount = candidates.filter((c) => c.dismissed).length
-  const liveCount = candidates.length - dismissedCount
-
   return (
     <>
       <div className="mb-12">
         <div className="flex flex-wrap items-center gap-3 mb-2">
           <h1 className="text-4xl font-bold text-foreground">Lab</h1>
-          <Badge variant="secondary">Auto-detected candidates</Badge>
+          <Badge variant="secondary">Auto-detected</Badge>
         </div>
         <p className="text-lg text-foreground/80 max-w-3xl">
           Patterns the scanner found in approved prototypes. The design-system owner
-          reviews and either <strong>approves</strong> a candidate (which opens a
-          promotion issue) or <strong>dismisses</strong> it (the scanner remembers and
-          stops re-suggesting).
+          approves a candidate (which scaffolds a draft component), refines it, then
+          promotes to <code>components/ui/</code>.
         </p>
         <p className="text-sm text-foreground/60 mt-3">
-          Scanner: <code>npm run scan</code> · Source of truth:{" "}
-          <code>components/_lab/_candidates/</code>
+          Run scan: <code>npm run scan</code> · Candidates:{" "}
+          <code>components/_lab/_candidates/</code> · Drafts:{" "}
+          <code>components/_lab/_drafts/</code>
         </p>
       </div>
 
       <Separator className="mb-8" />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
-        <div className="text-sm text-foreground/70">
-          <strong className="text-foreground">{liveCount}</strong> open ·{" "}
-          <strong className="text-foreground">{dismissedCount}</strong> dismissed
+      <DraftsSection />
+
+      <Separator className="my-12" />
+
+      <CandidatesSection candidates={candidates} />
+
+      <Separator className="my-12" />
+
+      <section className="max-w-3xl">
+        <h2 className="text-2xl font-semibold text-foreground mb-4">How this works</h2>
+        <ol className="space-y-2 text-foreground/80 list-decimal pl-5">
+          <li>Designers/PMs build prototypes in <code>app/&lt;prototype&gt;/</code>.</li>
+          <li>
+            Publishing a prototype = setting <code>status: &quot;approved&quot;</code>{" "}
+            in its <code>meta.ts</code>.
+          </li>
+          <li>
+            <code>npm run scan</code> walks approved prototypes, finds repeated JSX
+            patterns, writes <strong>Candidates</strong>.
+          </li>
+          <li>
+            Owner clicks <strong>Approve as component</strong> → scaffolds a{" "}
+            <strong>Draft</strong> (a real TSX file) with imports auto-derived from
+            the source. Live preview becomes available.
+          </li>
+          <li>
+            Owner refines the draft in editor (rename, prop API, variants, a11y,
+            tokens), commits, then clicks <strong>Promote to ui/</strong> → opens a
+            PR template that moves the file to <code>components/ui/</code>.
+          </li>
+          <li>CODEOWNERS gates the merge. Component now lives in the design system.</li>
+        </ol>
+      </section>
+    </>
+  )
+}
+
+function DraftsSection() {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+
+  async function discard(slug: string) {
+    if (!confirm(`Discard draft "${slug}"?`)) return
+    await fetch("/api/lab/discard-draft", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ slug }),
+    })
+    startTransition(() => router.refresh())
+  }
+
+  return (
+    <section>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <h2 className="text-2xl font-semibold text-foreground">Drafts</h2>
+        <Badge variant="outline">{drafts.length}</Badge>
+      </div>
+      <p className="text-sm text-foreground/70 mb-6">
+        Approved candidates scaffolded as real components. Refine them in your editor,
+        then promote to <code>components/ui/</code>.
+      </p>
+      {drafts.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center text-foreground/70">
+            No drafts yet. Approve a candidate below to scaffold one.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {drafts.map((d) => (
+            <DraftCard
+              key={d.slug}
+              slug={d.slug}
+              componentName={d.componentName}
+              Component={d.component}
+              pending={pending}
+              onDiscard={() => discard(d.slug)}
+            />
+          ))}
         </div>
+      )}
+    </section>
+  )
+}
+
+function DraftCard({
+  slug,
+  componentName,
+  Component,
+  pending,
+  onDiscard,
+}: {
+  slug: string
+  componentName: string
+  Component: React.ComponentType<any>
+  pending: boolean
+  onDiscard: () => void
+}) {
+  const [error, setError] = useState<Error | null>(null)
+  return (
+    <Card className="overflow-hidden">
+      <div className="bg-muted/40 p-8 flex items-center justify-center min-h-[180px]">
+        {error ? (
+          <div className="text-sm text-foreground/60 text-center">
+            <div className="font-medium mb-1">Preview failed to render</div>
+            <div className="text-xs">{error.message}</div>
+            <div className="text-xs mt-2">
+              Refine{" "}
+              <code>components/_lab/_drafts/{slug}.tsx</code> to fix.
+            </div>
+          </div>
+        ) : (
+          <ErrorBoundary onError={setError}>
+            <Component />
+          </ErrorBoundary>
+        )}
+      </div>
+      <CardHeader>
+        <CardTitle className="text-lg font-mono">{componentName}</CardTitle>
+        <CardDescription className="font-mono text-xs">
+          components/_lab/_drafts/{slug}.tsx
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="text-xs text-foreground/70">
+          Refine in your editor:{" "}
+          <code className="text-foreground">code components/_lab/_drafts/{slug}.tsx</code>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm">
+            <a href={promoteUrl(slug, componentName)} target="_blank" rel="noreferrer">
+              <GitPullRequest className="mr-2 h-4 w-4" />
+              Promote to ui/
+            </a>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pending}
+            onClick={onDiscard}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Discard
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+class ErrorBoundary extends React.Component<
+  { onError: (e: Error) => void; children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(error: Error) {
+    this.props.onError(error)
+  }
+  render() {
+    if (this.state.hasError) return null
+    return this.props.children
+  }
+}
+
+function CandidatesSection({ candidates }: { candidates: Candidate[] }) {
+  const [showDismissed, setShowDismissed] = useState(false)
+  const [showApproved, setShowApproved] = useState(false)
+  const visible = useMemo(() => {
+    return candidates.filter((c) => {
+      if (c.approved && !showApproved) return false
+      if (c.dismissed && !showDismissed) return false
+      return true
+    })
+  }, [candidates, showDismissed, showApproved])
+  const open = candidates.filter((c) => !c.dismissed && !c.approved).length
+  const approvedCount = candidates.filter((c) => c.approved).length
+  const dismissedCount = candidates.filter((c) => c.dismissed).length
+
+  return (
+    <section>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <h2 className="text-2xl font-semibold text-foreground">Candidates</h2>
+        <Badge variant="outline">{open}</Badge>
+      </div>
+      <p className="text-sm text-foreground/70 mb-4">
+        Auto-detected patterns awaiting triage. Approve scaffolds a draft you can
+        refine; Dismiss makes the scanner stop suggesting it.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowApproved((s) => !s)}
+        >
+          {showApproved ? "Hide approved" : `Show approved (${approvedCount})`}
+        </Button>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowDismissed((s) => !s)}
         >
-          {showDismissed ? (
-            <>
-              <EyeOff className="mr-2 h-4 w-4" /> Hide dismissed
-            </>
-          ) : (
-            <>
-              <Eye className="mr-2 h-4 w-4" /> Show dismissed ({dismissedCount})
-            </>
-          )}
+          {showDismissed ? "Hide dismissed" : `Show dismissed (${dismissedCount})`}
         </Button>
       </div>
 
       {visible.length === 0 ? (
-        <EmptyState hasAny={candidates.length > 0} />
+        <EmptyCandidates hasAny={candidates.length > 0} />
       ) : (
         <div className="space-y-6">
           {visible.map((c) => (
@@ -130,38 +316,7 @@ export function LabClient({ candidates }: { candidates: Candidate[] }) {
           ))}
         </div>
       )}
-
-      <Separator className="my-12" />
-
-      <section className="max-w-3xl">
-        <h2 className="text-2xl font-semibold text-foreground mb-4">
-          How candidates get here
-        </h2>
-        <ol className="space-y-2 text-foreground/80 list-decimal pl-5">
-          <li>Designers build prototypes in <code>app/&lt;prototype&gt;/</code>.</li>
-          <li>
-            When a prototype is published, its <code>meta.ts</code> is set to{" "}
-            <code>status: &quot;approved&quot;</code>.
-          </li>
-          <li>
-            The scanner (<code>npm run scan</code>) walks approved prototypes, finds
-            JSX patterns repeating <strong>3+ times within</strong> or{" "}
-            <strong>2+ times across</strong> prototypes, and writes one candidate per
-            pattern to <code>components/_lab/_candidates/</code>.
-          </li>
-          <li>
-            The design-system owner reviews this page. <strong>Approve</strong> opens
-            a promotion issue with the snippet pre-filled. <strong>Dismiss</strong>{" "}
-            marks the candidate as not a component (persists across scans).
-          </li>
-          <li>
-            On approval, the owner opens a PR that adds the cleaned component to{" "}
-            <code>components/ui/</code> with a proper name, prop API, variants, and a
-            showcase entry. CODEOWNERS gates the merge.
-          </li>
-        </ol>
-      </section>
-    </>
+    </section>
   )
 }
 
@@ -169,8 +324,10 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function setDismissed(dismissed: boolean) {
+    setError(null)
     await fetch("/api/lab/dismiss", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -179,25 +336,56 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
     startTransition(() => router.refresh())
   }
 
+  async function approve() {
+    setError(null)
+    const res = await fetch("/api/lab/approve", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ hash: candidate.hash }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || "approve failed")
+      return
+    }
+    startTransition(() => router.refresh())
+  }
+
   return (
-    <Card className={candidate.dismissed ? "opacity-60" : undefined}>
+    <Card
+      className={
+        candidate.dismissed
+          ? "opacity-60"
+          : candidate.approved
+            ? "border-success"
+            : undefined
+      }
+    >
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
               <CardTitle className="text-xl font-mono">
                 {candidate.suggestedName}
               </CardTitle>
               <Badge variant="outline" className="font-mono text-xs">
                 {candidate.hash}
               </Badge>
+              {candidate.approved && (
+                <Badge className="bg-success text-success-foreground">Approved</Badge>
+              )}
               {candidate.dismissed && <Badge variant="secondary">Dismissed</Badge>}
             </div>
             <CardDescription>
               Pattern based on <code>{candidate.tag}</code>. Seen{" "}
               <strong>{candidate.occurrenceCount}</strong> times across{" "}
-              <strong>{candidate.prototypeCount}</strong> prototype(s). Suggested name
-              is auto-generated; the reviewer renames during promotion.
+              <strong>{candidate.prototypeCount}</strong> prototype(s).
+              {candidate.approved && candidate.draftSlug && (
+                <>
+                  {" "}
+                  Scaffolded as draft <code>{candidate.draftSlug}</code>.
+                </>
+              )}
             </CardDescription>
           </div>
         </div>
@@ -239,10 +427,8 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
           </ul>
         </div>
 
-        {candidate.dismissed && candidate.dismissedReason && (
-          <div className="text-xs text-foreground/60 italic">
-            Dismissed: {candidate.dismissedReason}
-          </div>
+        {error && (
+          <div className="text-xs text-destructive">Error: {error}</div>
         )}
 
         <div className="flex flex-wrap gap-2 pt-2">
@@ -256,17 +442,15 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
               <RotateCcw className="mr-2 h-4 w-4" />
               Restore
             </Button>
+          ) : candidate.approved ? (
+            <span className="text-sm text-foreground/60 italic">
+              Scaffolded — see Drafts above.
+            </span>
           ) : (
             <>
-              <Button asChild size="sm">
-                <a
-                  href={approveUrl(candidate)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <GitPullRequest className="mr-2 h-4 w-4" />
-                  Approve as component
-                </a>
+              <Button size="sm" disabled={pending} onClick={approve}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Approve as component
               </Button>
               <Button
                 variant="outline"
@@ -295,24 +479,13 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
   )
 }
 
-function EmptyState({ hasAny }: { hasAny: boolean }) {
+function EmptyCandidates({ hasAny }: { hasAny: boolean }) {
   return (
     <Card>
-      <CardContent className="py-16 text-center">
-        <h3 className="text-xl font-semibold text-foreground mb-2">
-          {hasAny ? "All candidates dismissed" : "No candidates yet"}
-        </h3>
-        <p className="text-foreground/70 max-w-md mx-auto">
-          {hasAny ? (
-            <>Toggle &ldquo;Show dismissed&rdquo; to see what&apos;s been triaged.</>
-          ) : (
-            <>
-              Mark a prototype&apos;s <code>meta.ts</code> as{" "}
-              <code>status: &quot;approved&quot;</code>, then run{" "}
-              <code>npm run scan</code>.
-            </>
-          )}
-        </p>
+      <CardContent className="py-10 text-center text-foreground/70">
+        {hasAny
+          ? "Nothing to triage in the current view. Toggle filters above to see other candidates."
+          : "No candidates yet. Mark a prototype as approved and run npm run scan."}
       </CardContent>
     </Card>
   )

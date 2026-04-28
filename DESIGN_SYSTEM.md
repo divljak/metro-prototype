@@ -25,12 +25,14 @@ approved prototypes as the starting point.
    candidates to `components/_lab/_candidates/<hash>.json`.
 3. Design-system owner opens [`/design-system/lab`](http://localhost:3000/design-system/lab)
    and triages candidates:
-   - **Approve as component** → opens a pre-filled GitHub issue with the
-     snippet, occurrence list, and promotion checklist.
+   - **Approve as component** → scaffolds a draft TSX file at
+     `components/_lab/_drafts/<slug>.tsx` with auto-derived imports, and
+     surfaces a live preview on the lab page.
    - **Dismiss** → flag persists across scans.
-4. Owner takes the issue into a PR that adds a cleaned component to
-   `components/ui/` and a showcase entry to `app/design-system/page.tsx`.
-   `CODEOWNERS` requires the owner's approval on the merge.
+4. Owner refines the draft in their editor (rename, prop API, variants,
+   a11y, token compliance), then clicks **Promote to ui/** on the draft
+   card. That opens a PR template that moves the file from `_drafts/` to
+   `components/ui/` and adds a showcase entry. `CODEOWNERS` gates the merge.
 
 See [`components/_lab/README.md`](./components/_lab/README.md) for tunables and
 the limits of automated detection.
