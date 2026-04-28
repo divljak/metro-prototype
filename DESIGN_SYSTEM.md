@@ -2,6 +2,45 @@
 
 A clean, trustworthy banking UI built with Next.js, Tailwind CSS, and shadcn/ui.
 
+## Governance: Lab → UI promotion
+
+Two folders, two rules:
+
+- **`components/_lab/`** — sandbox. Designers ship from here without being
+  blocked by design-system rules. Token lint is relaxed.
+- **`components/ui/`** — blessed primitives. Token lint is enforced. Changes
+  require design-system owner review (see `.github/CODEOWNERS`).
+
+**Workflow**
+
+1. Build under `components/_lab/<file>.tsx` and add an entry to
+   `components/_lab/registry.tsx`.
+2. The component appears at [`/design-system/lab`](http://localhost:3000/design-system/lab)
+   with a live preview, owner, and "Used in" list.
+3. When ready, click **Nominate for promotion** on the lab card. That opens a
+   pre-filled GitHub issue using the `promote-component` template.
+4. Design-system owner reviews and approves the promotion PR. The PR moves the
+   file to `components/ui/`, adds a showcase entry to
+   `app/design-system/page.tsx`, updates imports, and removes the registry
+   entry.
+
+See [`components/_lab/README.md`](./components/_lab/README.md) for the full
+workflow including the readiness checklist and decay policy.
+
+## Token enforcement
+
+`npm run lint:tokens` (chained into `npm run lint`) scans `app/` and
+`components/` for raw hex literals, arbitrary Tailwind color utilities, and
+arbitrary fixed sizes. Allow-listed locations:
+
+- `app/design-system/**` — showcase swatches need raw hex on purpose.
+- `components/_lab/**` — sandbox; rules relaxed during prototyping.
+- `components/ui/**` — blessed primitives may use exact pixel control where
+  Radix integrations require it; the boundary is reviewed via `CODEOWNERS`.
+
+Anywhere else, use the tokens defined in `tailwind.config.ts` and
+`app/globals.css`.
+
 ## Design Principles
 
 ### Flat UI
