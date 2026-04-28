@@ -697,7 +697,7 @@ Metro Banking uses a completely flat design language. Visual hierarchy is create
 - **Tailwind Config:** `tailwind.config.ts`
 - **Global Styles:** `app/globals.css`
 - **Component Library:** `components/ui/`
-- **Technical Docs:** `DESIGN_SYSTEM.md`
+- **Agent Brief:** `CLAUDE.md`
 
 ---
 

@@ -48,7 +48,6 @@ project_knowledge/               → RFI answers + persona briefs
 
 ## Reference docs (read on demand, not by default)
 - `STYLE-DNA.md` — full visual language, components, copy patterns.
-- `DESIGN_SYSTEM.md` — implementation-level Tailwind/shadcn notes (subset of STYLE-DNA).
 - `specs/onboarding-round1.md` — Round 1 screens (welcome → provisional).
 - `specs/onboarding-round2.md` — Round 2 screens (secure-account → complete).
 - `MAGICPATCH_PROVISIONAL_DASHBOARD.md` — the dashboard between Round 1 and Round 2.

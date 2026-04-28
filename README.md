@@ -1,61 +1,40 @@
-# Metro Bank NextGen - Business Account Application
+# Metro Bank NextGen
 
-A Next.js application for the Metro Bank business account application journey, built with shadcn/ui components.
+Mobile-first prototype for Metro Bank's business account onboarding, provisional dashboard, and (forthcoming) RM workbench / broker portal.
 
-## Features
+Everything is mocked. No real APIs, no real auth, no real uploads.
 
-- Multi-step application form with progress tracking
-- Mocked data for all form inputs
-- Responsive design with Tailwind CSS
-- Accessible components following WCAG 2.1 AA standards
-- Journey-based flow matching the specification
+## Stack
 
-## Getting Started
+Next.js 14 (App Router) · TypeScript · Tailwind · shadcn/ui · Zustand · react-hook-form · zod.
 
-1. Install dependencies:
+## Getting started
+
 ```bash
 npm install
-```
-
-2. Run the development server:
-```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+Then open <http://localhost:3000>.
 
-## Project Structure
+```bash
+npm run build && npm start  # production build
+npm run lint                # eslint
+```
 
-- `/app` - Next.js app directory
-- `/components/journey` - Journey flow components
-- `/components/ui` - shadcn/ui components
-- `/lib` - Utilities and mock data
-- `/journey-01-apply-for-new-business-account.md` - Journey specification
+## Routes
 
-## Journey Flow
+| Route | What it is |
+|---|---|
+| `/start` | Entry point |
+| `/onboarding/round1/*` | 13-screen provisional account journey |
+| `/dashboard/provisional` | Holding state between Round 1 and Round 2 |
+| `/onboarding/round2/*` | 9-screen full verification journey |
+| `/design-system` | Live token + component reference |
 
-The application follows the 17-step journey defined in the specification:
+## Where to look next
 
-1. Product Selection
-2. Business Type Selection
-3. Company Registration
-4. Business Address
-5. Business Activity
-6. Banking Needs
-7. Primary Applicant
-8. Additional Signatories
-9. Mandate Setup
-10-12. Identity Verification (ID, Biometric, KYB)
-13-14. Application Review & Consent
-15-16. Processing
-17. Result
-
-## Technologies
-
-- Next.js 14
-- React 18
-- TypeScript
-- Tailwind CSS
-- shadcn/ui components
-- Radix UI primitives
-
+- **`CLAUDE.md`** — agent brief: brand voice, tokens, file map, rules.
+- **`STYLE-DNA.md`** — full visual language and component patterns.
+- **`specs/`** — per-screen UX intent. Read before editing a screen.
+- **`project_knowledge/`** — RFI answers and persona briefs.
