@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint && npm run lint:tokens",
+    "lint:tokens": "node scripts/check-design-tokens.mjs",
+    "scan": "node scripts/scan-prototypes.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

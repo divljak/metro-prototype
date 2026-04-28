@@ -1,0 +1,10 @@
+# Design system gatekeepers
+# Replace @design-system-owner with the actual GitHub handle(s).
+# Anything under components/ui/ and the design-system showcase requires their review.
+
+/components/ui/                  @design-system-owner
+/app/design-system/page.tsx      @design-system-owner
+/tailwind.config.ts              @design-system-owner
+/app/globals.css                 @design-system-owner
+/scripts/check-design-tokens.mjs @design-system-owner
+/DESIGN_SYSTEM.md                @design-system-owner

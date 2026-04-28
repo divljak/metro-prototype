@@ -1,0 +1,29 @@
+{
+  "hash": "d2ac9775",
+  "suggestedName": "AlertPattern",
+  "tag": "Alert",
+  "occurrenceCount": 3,
+  "prototypeCount": 1,
+  "occurrences": [
+    {
+      "prototype": "app/onboarding/round2",
+      "file": "app/onboarding/round2/dashboard/page.tsx",
+      "line": 76
+    },
+    {
+      "prototype": "app/onboarding/round2",
+      "file": "app/onboarding/round2/lending/page.tsx",
+      "line": 273
+    },
+    {
+      "prototype": "app/onboarding/round2",
+      "file": "app/onboarding/round2/lending/page.tsx",
+      "line": 435
+    }
+  ],
+  "sample": "<Alert className=\"mt-4\">\n            <Info className=\"h-5 w-5\" />\n            <AlertTitle>Your provisional account is active</AlertTitle>\n            <AlertDescription className=\"text-sm\">\n              You can already receive and send payments with limited amounts. Complete the steps below to unlock full features.\n            </AlertDescription>\n          </Alert>",
+  "dismissed": false,
+  "dismissedReason": null,
+  "firstSeenAt": "2026-04-28",
+  "lastSeenAt": "2026-04-28"
+}

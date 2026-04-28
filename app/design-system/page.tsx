@@ -20,6 +20,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import Link from "next/link"
+import { FlaskConical } from "lucide-react"
 
 export default function DesignSystemPage() {
   const [progress, setProgress] = useState(65)
@@ -29,7 +31,15 @@ export default function DesignSystemPage() {
       <div className="container mx-auto py-12 px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Metro Banking Design System</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-2">
+            <h1 className="text-4xl font-bold text-foreground">Metro Banking Design System</h1>
+            <Button asChild variant="outline">
+              <Link href="/design-system/lab">
+                <FlaskConical className="mr-2 h-4 w-4" />
+                View Lab
+              </Link>
+            </Button>
+          </div>
           <p className="text-lg text-foreground/80">
             A flat, trustworthy UI with no shadows, clean lines, and bold brand colors.
           </p>
@@ -249,10 +259,10 @@ export default function DesignSystemPage() {
                   <h3 className="text-lg font-semibold mb-3">Accent (Red Pill) - 25% of Buttons</h3>
                   <p className="text-sm text-muted-foreground mb-3">Critical actions only: Confirm Payment, Transfer Funds, Apply Now</p>
                   <div className="flex flex-wrap gap-4">
-                    <Button variant="accent" size="sm">Transfer</Button>
-                    <Button variant="accent">Confirm Payment</Button>
-                    <Button variant="accent" size="lg">Apply Now</Button>
-                    <Button variant="accent" disabled>Disabled</Button>
+                    <Button size="sm">Transfer</Button>
+                    <Button>Confirm Payment</Button>
+                    <Button size="lg">Apply Now</Button>
+                    <Button disabled>Disabled</Button>
                   </div>
                 </div>
 

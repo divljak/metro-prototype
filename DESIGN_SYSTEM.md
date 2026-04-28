@@ -2,6 +2,55 @@
 
 A clean, trustworthy banking UI built with Next.js, Tailwind CSS, and shadcn/ui.
 
+## Governance: how components get into the design system
+
+**Designers and PMs do not author components.** They build prototypes. The
+design-system owner authors components, using auto-detected candidates from
+approved prototypes as the starting point.
+
+**Roles**
+
+- **Designers / PMs** — build prototypes in `app/<prototype>/`. Flip
+  `app/<prototype>/meta.ts` to `status: "approved"` when published. Done.
+- **Design-system owner** (gated via `.github/CODEOWNERS`) — reviews candidates
+  in the lab, approves them into promotion PRs, and shapes the final
+  component (name, prop API, variants, a11y, tokens) before it lands in
+  `components/ui/`.
+
+**Workflow**
+
+1. Designer publishes a prototype → flips `meta.ts` to `status: "approved"`.
+2. Scanner (`npm run scan`) walks approved prototypes, finds JSX patterns
+   that repeat 3+ times within or 2+ times across prototypes, and writes
+   candidates to `components/_lab/_candidates/<hash>.json`.
+3. Design-system owner opens [`/design-system/lab`](http://localhost:3000/design-system/lab)
+   and triages candidates:
+   - **Approve as component** → scaffolds a draft TSX file at
+     `components/_lab/_drafts/<slug>.tsx` with auto-derived imports, and
+     surfaces a live preview on the lab page.
+   - **Dismiss** → flag persists across scans.
+4. Owner refines the draft in their editor (rename, prop API, variants,
+   a11y, token compliance), then clicks **Promote to ui/** on the draft
+   card. That opens a PR template that moves the file from `_drafts/` to
+   `components/ui/` and adds a showcase entry. `CODEOWNERS` gates the merge.
+
+See [`components/_lab/README.md`](./components/_lab/README.md) for tunables and
+the limits of automated detection.
+
+## Token enforcement
+
+`npm run lint:tokens` (chained into `npm run lint`) scans `app/` and
+`components/` for raw hex literals, arbitrary Tailwind color utilities, and
+arbitrary fixed sizes. Allow-listed locations:
+
+- `app/design-system/**` — showcase swatches need raw hex on purpose.
+- `components/_lab/**` — sandbox; rules relaxed during prototyping.
+- `components/ui/**` — blessed primitives may use exact pixel control where
+  Radix integrations require it; the boundary is reviewed via `CODEOWNERS`.
+
+Anywhere else, use the tokens defined in `tailwind.config.ts` and
+`app/globals.css`.
+
 ## Design Principles
 
 ### Flat UI
