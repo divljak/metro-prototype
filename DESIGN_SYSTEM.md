@@ -2,30 +2,38 @@
 
 A clean, trustworthy banking UI built with Next.js, Tailwind CSS, and shadcn/ui.
 
-## Governance: Lab → UI promotion
+## Governance: how components get into the design system
 
-Two folders, two rules:
+**Designers and PMs do not author components.** They build prototypes. The
+design-system owner authors components, using auto-detected candidates from
+approved prototypes as the starting point.
 
-- **`components/_lab/`** — sandbox. Designers ship from here without being
-  blocked by design-system rules. Token lint is relaxed.
-- **`components/ui/`** — blessed primitives. Token lint is enforced. Changes
-  require design-system owner review (see `.github/CODEOWNERS`).
+**Roles**
+
+- **Designers / PMs** — build prototypes in `app/<prototype>/`. Flip
+  `app/<prototype>/meta.ts` to `status: "approved"` when published. Done.
+- **Design-system owner** (gated via `.github/CODEOWNERS`) — reviews candidates
+  in the lab, approves them into promotion PRs, and shapes the final
+  component (name, prop API, variants, a11y, tokens) before it lands in
+  `components/ui/`.
 
 **Workflow**
 
-1. Build under `components/_lab/<file>.tsx` and add an entry to
-   `components/_lab/registry.tsx`.
-2. The component appears at [`/design-system/lab`](http://localhost:3000/design-system/lab)
-   with a live preview, owner, and "Used in" list.
-3. When ready, click **Nominate for promotion** on the lab card. That opens a
-   pre-filled GitHub issue using the `promote-component` template.
-4. Design-system owner reviews and approves the promotion PR. The PR moves the
-   file to `components/ui/`, adds a showcase entry to
-   `app/design-system/page.tsx`, updates imports, and removes the registry
-   entry.
+1. Designer publishes a prototype → flips `meta.ts` to `status: "approved"`.
+2. Scanner (`npm run scan`) walks approved prototypes, finds JSX patterns
+   that repeat 3+ times within or 2+ times across prototypes, and writes
+   candidates to `components/_lab/_candidates/<hash>.json`.
+3. Design-system owner opens [`/design-system/lab`](http://localhost:3000/design-system/lab)
+   and triages candidates:
+   - **Approve as component** → opens a pre-filled GitHub issue with the
+     snippet, occurrence list, and promotion checklist.
+   - **Dismiss** → flag persists across scans.
+4. Owner takes the issue into a PR that adds a cleaned component to
+   `components/ui/` and a showcase entry to `app/design-system/page.tsx`.
+   `CODEOWNERS` requires the owner's approval on the merge.
 
-See [`components/_lab/README.md`](./components/_lab/README.md) for the full
-workflow including the readiness checklist and decay policy.
+See [`components/_lab/README.md`](./components/_lab/README.md) for tunables and
+the limits of automated detection.
 
 ## Token enforcement
 

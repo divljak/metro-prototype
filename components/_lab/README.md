@@ -1,72 +1,73 @@
 # Components Lab
 
-A sandbox for new components. Designers ship from here without being blocked by
-design-system rules. When a component is ready, it gets promoted to
-`components/ui/`.
+The lab is **not a folder designers add things to**. It's a feed of component
+candidates that the scanner auto-detects from approved prototypes.
 
-## Why this exists
+## How it works
 
-Without a lab folder, every new component either lands in `components/ui/`
-(forcing premature design-system review) or lives unstructured inside a feature
-folder (causing duplication and drift). The lab gives designers a clear,
-fast-moving space and the design-system owner a clear gate.
-
-## Adding a component
-
-1. Create `components/_lab/<your-component>.tsx`. Use Metro tokens where you can,
-   but ad-hoc styles are tolerated here.
-2. Add an entry to [`registry.tsx`](./registry.tsx):
-
-   ```tsx
-   {
-     slug: "your-component",
-     name: "YourComponent",
-     owner: "@your-handle",
-     description: "What it does and why it might belong in the design system.",
-     addedAt: "YYYY-MM-DD",
-     sourcePath: "components/_lab/your-component.tsx",
-     usedIn: [],
-     component: YourComponent,
-     preview: <YourComponent prop="..." />,
+1. **Designers build prototypes** in `app/<prototype>/`. They write whatever
+   JSX they need — no thinking about reusable components.
+2. **A prototype is published** by flipping its `meta.ts`:
+   ```ts
+   // app/dashboard/meta.ts
+   export const meta = {
+     name: "Dashboard",
+     status: "approved",  // ← was "draft"
+     owner: "@design-team",
    }
    ```
+3. **The scanner runs** (`npm run scan`, or wire it into CI) and walks every
+   approved prototype. JSX subtrees that repeat **3+ times within** a prototype
+   or **2+ times across** prototypes are written as candidates to
+   `_candidates/<hash>.json`.
+4. **The design-system owner reviews** at
+   [`/design-system/lab`](http://localhost:3000/design-system/lab):
+   - **Approve as component** opens a pre-filled GitHub issue with the snippet,
+     occurrence list, and a promotion checklist. The owner takes that issue
+     into a PR that adds a cleaned component to `components/ui/` (renamed,
+     proper prop API, variants, a11y, token-compliant). CODEOWNERS gates the
+     merge.
+   - **Dismiss** marks the candidate as not a component. The flag persists
+     across scans — the scanner won't re-suggest it unless restored.
 
-3. Import it in any page via `@/components/_lab/your-component`.
-4. Visit `/design-system/lab` to see it in the gallery.
+## Designers and PMs do not touch this folder
 
-## Nominating for promotion
+The whole point of the lab is that the prototyping team is unburdened from
+component-authoring. They build prototypes; the scanner finds patterns; the
+design-system owner does the cleanup. The folder structure here is internal
+plumbing for the scanner.
 
-When the component feels stable:
+## What's in this folder
 
-1. Open `/design-system/lab` and click **Nominate for promotion** on its card.
-   That opens a pre-filled GitHub issue using the
-   [`promote-component`](../../.github/ISSUE_TEMPLATE/promote-component.md)
-   template.
-2. The design-system owner triages: requests changes, asks for variants, or
-   approves.
-3. Approval → open the **promotion PR** which:
-   - Moves `components/_lab/<file>.tsx` → `components/ui/<file>.tsx`
-   - Adds a showcase entry to `app/design-system/page.tsx`
-   - Updates all imports (`_lab/foo` → `ui/foo`)
-   - Removes the registry entry from `_lab/registry.tsx`
-   - Passes `npm run lint:tokens`
-4. `CODEOWNERS` requires the owner's review on the promotion PR before merge.
+```
+_lab/
+  _candidates/
+    <hash>.json   ← one per detected pattern; written by scripts/scan-prototypes.mjs
+```
 
-## What "ready" looks like
+## Tunables
 
-A component is ready to promote when:
+In `scripts/scan-prototypes.mjs`:
 
-- It uses Metro tokens (no raw hex, no arbitrary fixed sizes — same rule that
-  applies to `components/ui/`).
-- All visual variants are expressed via [CVA](https://cva.style) like the other
-  primitives in `components/ui/`.
-- It works across `xs / sm / md / lg` breakpoints.
-- It passes a basic a11y check (keyboard navigation, focus states, ARIA where
-  relevant).
-- There is a clear use case — either it's already used in 1+ page or there's a
-  near-term plan documented in the issue.
+- `MIN_OCCURRENCES_WITHIN_PROTOTYPE` (default 3) — how many times a pattern
+  must appear in one prototype to qualify.
+- `MIN_OCCURRENCES_ACROSS_PROTOTYPES` (default 2) — minimum number of distinct
+  prototypes a pattern must appear in.
+- `MIN_DEPTH` (default 2) and `MIN_CHILDREN` (default 3) — filters out trivial
+  shapes.
 
-## Decay
+Raise these if the lab feels noisy; lower them if you suspect candidates are
+being missed.
 
-Anything in `_lab/` older than ~60 days with no usage gets a "delete or
-promote?" issue. The lab is a sandbox, not a graveyard.
+## Limits of automated detection
+
+The scanner finds **structural** repetition (tag tree shapes). It does not:
+
+- Detect semantically similar but structurally different patterns.
+- Suggest good names. The `suggestedName` is always a placeholder; the owner
+  renames during promotion.
+- Replace human judgment about whether a pattern *should* become a component.
+  Some repetition is incidental, not signal.
+
+Expect to dismiss a meaningful share of candidates. That's normal — the
+scanner's job is to surface possibilities, not make decisions.
