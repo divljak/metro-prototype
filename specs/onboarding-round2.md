@@ -4,7 +4,7 @@ After the provisional account is live and the customer has been to `/dashboard/p
 
 Companion docs:
 - `specs/onboarding-round1.md` — provisional account flow
-- `MAGICPATCH_PROVISIONAL_DASHBOARD.md` — the dashboard that links into Round 2
+- `app/dashboard/provisional/page.tsx` — the dashboard that links into Round 2 (source of truth lives in code)
 - `lib/constants/timing.ts` — mock delays
 - `STYLE-DNA.md` — visual language
 

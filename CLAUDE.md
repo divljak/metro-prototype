@@ -50,9 +50,7 @@ project_knowledge/               → RFI answers + persona briefs
 - `STYLE-DNA.md` — full visual language, components, copy patterns.
 - `specs/onboarding-round1.md` — Round 1 screens (welcome → provisional).
 - `specs/onboarding-round2.md` — Round 2 screens (secure-account → complete).
-- `MAGICPATCH_PROVISIONAL_DASHBOARD.md` — the dashboard between Round 1 and Round 2.
 - `project_knowledge/*.md` — RFI Q&A and persona briefs (RM, broker, customer).
-- `product-manager-skill.md` — PM-perspective skill prompts.
 
 ## Current focus
 Round 2 onboarding polish + provisional dashboard refinement.

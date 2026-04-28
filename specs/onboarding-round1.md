@@ -4,7 +4,7 @@ Per-screen UX intent for the 13 screens that take a customer from welcome to a w
 
 Companion docs:
 - `specs/onboarding-round2.md` — full verification flow
-- `MAGICPATCH_PROVISIONAL_DASHBOARD.md` — the dashboard shown between Round 1 and Round 2
+- `app/dashboard/provisional/page.tsx` — the dashboard shown between Round 1 and Round 2 (source of truth lives in code)
 - `lib/constants/timing.ts` — mock delays referenced below
 - `STYLE-DNA.md` — visual language and components
 
